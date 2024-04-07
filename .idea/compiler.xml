@@ -9,5 +9,8 @@
         <module name="ocado" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="ocado" target="17" />
+    </bytecodeTargetLevel>
   </component>
 </project>

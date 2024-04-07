@@ -1,7 +1,10 @@
 package com.ocado.basket;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -10,18 +13,33 @@ import java.util.*;
 
 
 public class BasketSplitter {
-
     Map<String, List<String>> deliveryConfig = new HashMap<>();
+
+    public boolean isValidJson(String jsonString) {
+        try {
+            JsonParser parser = new JsonParser();
+            parser.parse(jsonString);
+            return true;
+        } catch (JsonSyntaxException e) {
+            throw new com.google.gson.JsonSyntaxException("Invalid JSON");
+        }
+    }
 
     public BasketSplitter(String absolutePathToConfigFile) {
         Gson gson = new Gson();
-        try {
-            FileReader reader = new FileReader(absolutePathToConfigFile);
+        String fileContent;
+        try (FileReader reader = new FileReader(absolutePathToConfigFile);
+            BufferedReader bufferedReader = new BufferedReader(reader)) {
+            StringBuilder contentBuilder = new StringBuilder();
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                contentBuilder.append(line).append("\n");
+            }
+            fileContent = contentBuilder.toString();
+            isValidJson(fileContent);
+
             Type type = new TypeToken<Map<String, List<String>>>(){}.getType();
-            deliveryConfig = gson.fromJson(reader, type);
-            reader.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            deliveryConfig = gson.fromJson(fileContent, type);
         } catch (IOException e) {
             e.printStackTrace();
         }
