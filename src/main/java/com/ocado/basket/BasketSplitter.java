@@ -4,17 +4,12 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.util.*;
 
-
 public class BasketSplitter {
     Map<String, List<String>> deliveryConfig = new HashMap<>();
-
     public boolean isValidJson(String jsonString) {
         try {
             JsonParser parser = new JsonParser();
@@ -25,8 +20,9 @@ public class BasketSplitter {
         }
     }
 
-    public BasketSplitter(String absolutePathToConfigFile) {
+    public BasketSplitter(String absolutePathToConfigFile) throws FileNotFoundException {
         Gson gson = new Gson();
+
         String fileContent;
         try (FileReader reader = new FileReader(absolutePathToConfigFile);
             BufferedReader bufferedReader = new BufferedReader(reader)) {
@@ -40,6 +36,8 @@ public class BasketSplitter {
 
             Type type = new TypeToken<Map<String, List<String>>>(){}.getType();
             deliveryConfig = gson.fromJson(fileContent, type);
+        } catch (FileNotFoundException e) {
+            throw new FileNotFoundException("File not found");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -71,7 +69,7 @@ public class BasketSplitter {
         return deliveryGroups;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws FileNotFoundException, RuntimeException {
         BasketSplitter basketSplitter = new BasketSplitter("/home/nastia/ocado/src/main/resources/config.json");
 
         List<String> items = Arrays.asList(
